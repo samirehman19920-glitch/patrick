@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>System Specs</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <h1>System Specs</h1>
+      <p class="sub">Your device (browser) — each visitor sees their own machine, not the server</p>
+    </header>
+
+    <section class="card" aria-busy="true" id="card">
+      <div class="loading" id="loading">Reading your device…</div>
+      <dl class="grid hidden" id="grid">
+        <div class="row">
+          <dt>CPU</dt>
+          <dd id="cpu">—</dd>
+        </div>
+        <div class="row">
+          <dt>RAM</dt>
+          <dd id="ram">—</dd>
+        </div>
+        <div class="row">
+          <dt>OS</dt>
+          <dd id="os">—</dd>
+        </div>
+        <div class="row">
+          <dt>Internet speed</dt>
+          <dd id="internet_speed">—</dd>
+        </div>
+      </dl>
+      <p class="err hidden" id="err" role="alert"></p>
+    </section>
+
+    <footer class="foot">
+      <button type="button" class="btn" id="refresh">Refresh</button>
+      <button type="button" class="link" id="openJson" disabled>Open JSON</button>
+    </footer>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

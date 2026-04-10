@@ -2,9 +2,18 @@ import platform
 import subprocess
 import time
 import urllib.request
-from fastapi import FastAPI
+from pathlib import Path
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+
+BASE_DIR = Path(__file__).resolve().parent
+# Vercel serves `public/**` from the CDN; keep the same paths for local uvicorn.
+PUBLIC_DIR = BASE_DIR / "public"
+PUBLIC_STATIC = PUBLIC_DIR / "static"
 
 app = FastAPI(title="System Spec API", version="1.0.0")
 
@@ -15,6 +24,9 @@ app.add_middleware(
     allow_methods=["GET"],
     allow_headers=["*"],
 )
+
+if PUBLIC_STATIC.is_dir():
+    app.mount("/static", StaticFiles(directory=str(PUBLIC_STATIC)), name="static")
 
 
 # ──────────────────────────────────────────
@@ -118,12 +130,29 @@ def get_internet_speed() -> str:
 #  ENDPOINTS
 # ──────────────────────────────────────────
 
-@app.get("/", response_model=SystemSpecs)
-def get_all_specs():
-    """Returns all system specs in a single API call."""
+
+@app.get("/")
+def root(request: Request, format: str | None = None):
+    """HTML for browsers; JSON when Accept prefers application/json or ?format=json."""
+    accept = request.headers.get("accept") or ""
+    wants_json = "application/json" in accept or format == "json"
+    index = PUBLIC_DIR / "index.html"
+    if not wants_json and index.is_file():
+        return FileResponse(index)
     return SystemSpecs(
-        cpu            = get_cpu(),
-        ram            = get_ram(),
-        os             = get_os(),
-        internet_speed = get_internet_speed(),
+        cpu=get_cpu(),
+        ram=get_ram(),
+        os=get_os(),
+        internet_speed=get_internet_speed(),
+    )
+
+
+@app.get("/api/specs", response_model=SystemSpecs)
+def get_all_specs():
+    """Returns all system specs as JSON."""
+    return SystemSpecs(
+        cpu=get_cpu(),
+        ram=get_ram(),
+        os=get_os(),
+        internet_speed=get_internet_speed(),
     )
